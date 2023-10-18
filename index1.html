@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Vue Lesson_3 task_1</title>
+	<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+	<style>
+		ul {
+			list-style: none;
+			margin: 0;
+			padding: 0;
+		}
+		li {
+			cursor: pointer;
+			padding: 5px;
+			margin: 5px 0;
+		}
+		h3 {
+			text-align: center;
+			margin: 10px 0;
+		}
+		.container {
+			display: flex;
+		}
+		.list__container {
+			min-width: 250px;
+			border: 2px solid #000;
+			margin: 0 20px 20px;
+			padding: 10px;
+		}
+		.pairs{
+			margin: 20px;
+			padding: 0 20px;
+			width: 500px;
+			border: 2px solid darkblue;
+		}
+		.addBtn{
+			padding: 12px 30px;
+			margin-left: 150px;
+			font-size: 20px;
+		}
+		.selected{
+			border: 2px solid blue;
+		}
+		
+	</style>
+</head>
+
+<body>
+	<div id="task1">
+		<h2>Задача 1</h2>
+		<div style="max-width:500px; font-style: italic;">
+			Пари для танців. Поступово вибираємо хлопця, дівчину і додаємо у обрані пари. Пару можна видалити. Поки не вибрано
+			хлопця і дівчину кнопка «Додати» заблокована. Якщо не вистачає хлопців або дівчат вибір також блокується.
+			=====================================================================
+		</div>
+		<div class="container">
+			<div class="list__container">
+				<h3>Хлопці</h3>
+				<ul v-for="(boy, i) in boys" :key="i">
+					<li 
+						@click="onSelectBoy(i)"
+						:class="{
+							selected: i == selectedIndexOfBoys
+						}">
+							{{ boy }}
+					</li>
+				</ul>
+			</div>
+			<div class="list__container">
+				<h3>Дівчата</h3>
+				<ul v-for="(girl, k) in girls" :key="k">
+					<li 
+						@click="onSelectGirl(k)" 
+						:class="{
+							selected: k == selectedIndexOfGirls
+							}">
+							{{ girl }}
+					</li>
+				</ul>
+			</div>
+		</div>
+		<button class="addBtn"
+			 @click="onFormPair"
+			 :disabled = showAddBtn>
+			 	Додати
+		</button>
+		<div class="pairs">
+			<h3>Обрані пари</h3>
+			<ul v-for="(pair, index) in pairs" :key="index">
+				<li>
+					{{ pair }}
+					<button @click="onDeletePair(index)">
+						Видалити пару
+					</button>
+				</li>
+			</ul>
+		</div>
+	</div>
+
+	<script>
+		const { createApp } = Vue;
+		const app = createApp({
+			data() {
+				return {
+					boys: ['Юрій', 'Олександр', 'Андрій', 'Ігор', 'Віктор', 'Михайло'],
+					girls: ['Катерина', 'Оксана', 'Тетяна', 'Леся', 'Марина', 'Жанна', 'Інна'],
+					pairs: [],
+					selectedPairFirst: null,
+					selectedPairSecond: null,
+					selectedIndexOfBoys: null,
+					selectedIndexOfGirls: null
+					
+				}
+			},
+			computed: {
+				selectedPair() {
+					if (this.selectedPairFirst && this.selectedPairSecond) {
+						return this.selectedPairFirst+' - '+this.selectedPairSecond;
+					}
+				},
+				showAddBtn(){
+					if (!this.selectedPairFirst || !this.selectedPairSecond) return true;
+				}
+			},
+			methods: {
+				onSelectBoy(index){
+					this.selectedPairFirst = this.boys[index];
+					this.selectedIndexOfBoys = index;
+				},
+				onSelectGirl(index){
+					this.selectedPairSecond = this.girls[index];
+					this.selectedIndexOfGirls = index;
+				},
+				onFormPair(){
+					this.pairs.push(this.selectedPair);
+					this.boys.splice(this.selectedIndexOfBoys, 1);
+					this.girls.splice(this.selectedIndexOfGirls, 1);
+					this.selectedIndexOfBoys = null;
+					this.selectedIndexOfGirls = null;
+					this.selectedPairFirst = null;
+					this.selectedPairSecond = null;
+				},
+				onDeletePair(index){
+					let deletedPair;
+					deletedPair = this.pairs.splice(index, 1);
+					// console.log(deletedPair);
+					let [a,b] = deletedPair[0].split(' - ');
+					this.boys.push(a);
+					this.girls.push(b);
+				}
+			}
+		});
+		app.mount('#task1');
+	</script>
+</body>
+
+</html>

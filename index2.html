@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Vue Lesson_3 task_2</title>
+	<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+	<style>
+		.message{
+			font-weight: bold;
+			color:green;
+			margin: 20px 0;
+		}
+
+				
+	</style>
+</head>
+
+<body>
+	<div id="task2">
+		<h2>Задача 2</h2>
+		<div style="max-width:500px; font-style: italic;">
+			Тренажер додавання. Вводимо загальну кількість прикладів і натискаємо на кнопку «Старт». Після запуску (натисканні на
+			кнопку «Старт») кожні 10 секунд (10 секунд між завданнями) користувачу задають випадковий приклад з додавання двох цифр
+			і робиться перевірка. Формується список тих, які він відповів правильно, і які він відповів неправильно. Загальна
+			кількість прикладів вводиться.
+			=====================================================================
+		</div>
+		<div class="container">
+			<div>
+				<label>
+					Введіть кількість прикладів:
+					<input type="number" v-model.lazy="expessionCount">
+					<button @click="onStartExercise">Почати</button>
+				</label>
+			</div>
+			<div v-if="showExercise">
+				<p>Введіть відповідь у поле для вводу і натисніть "Ok":</p>
+				<p>
+					{{ num1 }} + {{ num2 }} = 
+					<input 
+						type="number"
+						v-model="sumResult"
+						ref="myInput"
+						:disabled="waitingForNextExercise"
+					>
+					<button @click="testResult" > Ok </button>
+				</p>
+				<div class="message">
+					{{ message }}
+				</div>
+				<div class="answers">Правильних відповідей: {{ rightAnswersCount }}</div>
+				<div class="answers">
+					Правильні відповіді:
+					<ul>
+						<li v-for="(answer, index) in correctAnswers" :key="index">{{ answer }}</li>
+					</ul>
+				</div>
+				<div class="answers">
+					Неправильні відповіді:
+					<ul>
+						<li v-for="(answer, index) in incorrectAnswers" :key="index">{{ answer }}</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		const { createApp } = Vue;
+		const app = createApp({
+			data() {
+				return {
+					expessionCount: null,
+					num1: null,
+					num2: null,
+					message: null,
+					sumResult: null,
+					rightAnswersCount: 0,
+					waitingForNextExercise: false,
+					correctAnswers: [],
+					incorrectAnswers: []
+				}
+			},
+			computed: {
+				showExercise() {
+					return this.num1 && this.num2;
+				}
+			},
+			methods: {
+				getRandomNumbers(){
+					this.num1 = Math.floor(Math.random()*99 + 1);
+					this.num2 = Math.floor(Math.random()*99 + 1);
+					this.message = null;
+					// console.log('this.num1:', this.num1);
+					// console.log('this.num2:', this.num2);
+				},
+				onStartExercise() {
+					this.rightAnswersCount = 0;
+					this.startNextExercise();
+				},
+				startNextExercise() {
+					if (this.expessionCount > 0) {
+						this.getRandomNumbers();
+						setTimeout(() => {
+							this.waitingForNextExercise = false;
+							this.expessionCount--;
+							if (this.expessionCount > 0) {
+								this.startNextExercise();
+							} else {
+								this.waitingForNextExercise = true;
+								this.message = "Гру закінчено!"
+							}
+						}, 10000); 
+					}
+				},
+				testResult(){
+					this.waitingForNextExercise = true;
+					let answerIsCorrect = this.sumResult == this.num1 + this.num2;
+					let answerString = `${this.num1} + ${this.num2} = ${this.sumResult} - ${answerIsCorrect}`;
+					if (answerIsCorrect) {
+						this.message = "Правильно!";
+						this.correctAnswers.push(answerString);
+						this.focusInput();
+						this.sumResult = null;
+						++this.rightAnswersCount;
+					} else {
+						this.message = "Помилка!";
+						this.incorrectAnswers.push(answerString);
+						this.focusInput();
+						this.sumResult = null;
+					} 
+				},
+				focusInput(){
+					this.$refs.myInput.focus();
+				}
+			}	
+			
+		});
+		app.mount('#task2');
+	</script>
+</body>
+
+</html>
